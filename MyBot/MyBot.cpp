@@ -1,39 +1,52 @@
+#include <unordered_map>
+#include <string_view>
+#include <cstring>
 #include <dpp/dpp.h>
+#include <filesystem>
+#include "utils.h"
+#include <json.hpp>
+#include <MyBot.h>
 
-/* Be sure to place your token in the line below.
- * Follow steps here to get a token:
- * https://dpp.dev/creating-a-bot-application.html
- * When you invite the bot, be sure to invite it with the 
- * scopes 'bot' and 'applications.commands', e.g.
- * https://discord.com/oauth2/authorize?client_id=940762342495518720&scope=bot+applications.commands&permissions=139586816064
- */
-const std::string    BOT_TOKEN    = "add your token here";
+std::unordered_map<std::string, command_entry> commands;
+std::string get_token()
+{
+    std::string path = std::filesystem::current_path().string();
+    std::string file = path + "\\config.json";
+    std::ifstream ifs(file);
+    if (!ifs.is_open())
+    {
+        Log("Config not found at %s", file.c_str());
+        return "";
+    }
+    std::stringstream ss;
+    ss << ifs.rdbuf();
+    ifs.close();
+    nlohmann::json json = nlohmann::json::parse(ss.str());
+    return json["token"];
+}
 
 int main()
 {
-    /* Create bot cluster */
-    dpp::cluster bot(BOT_TOKEN);
+    dpp::cluster bot(get_token());
+    init_commands(bot);
 
-    /* Output simple log messages to stdout */
-    bot.on_log(dpp::utility::cout_logger());
+    bot.on_slashcommand([&bot](const dpp::slashcommand_t &event)
+                        {
+        commands[event.command.get_command_name()].cb(bot, event);
+        Log("%s Called by %s", event.command.get_command_name().c_str(), event.command.usr.username.c_str()); });
 
-    /* Handle slash command */
-    bot.on_slashcommand([](const dpp::slashcommand_t& event) {
-         if (event.command.get_command_name() == "ping") {
-            event.reply("Pong!");
-        }
-    });
+    bot.on_ready([&bot](const dpp::ready_t &event)
+                 {
+        if (dpp::run_once<struct register_bot_commands>())
+        {
+            for (auto &[name, entry] : commands)
+            {
+                bot.global_command_create(entry.cmd);
+                Log("Registered command %s", name.c_str());
+            }
+            Log("Registered %d commands", commands.size());
+        } });
 
-    /* Register slash command here in on_ready */
-    bot.on_ready([&bot](const dpp::ready_t& event) {
-        /* Wrap command registration in run_once to make sure it doesnt run on every full reconnection */
-        if (dpp::run_once<struct register_bot_commands>()) {
-            bot.global_command_create(dpp::slashcommand("ping", "Ping pong!", bot.me.id));
-        }
-    });
-
-    /* Start the bot */
+    Log("Bot Starting...");
     bot.start(false);
-
-    return 0;
 }

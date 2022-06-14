@@ -383,3 +383,5 @@ FodyWeavers.xsd
 # JetBrains Rider
 .idea/
 *.sln.iml
+LawnmowerPlusPlus/config.json
+.vscode/settings.json
