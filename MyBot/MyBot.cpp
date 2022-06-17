@@ -1,70 +1,39 @@
 #include <dpp/dpp.h>
-#include <filesystem>
-#include "helpers.h"
-#include <json.hpp>
-#include "includes.h"
 
-std::filesystem::path config_path = "./config.json";
-typedef void (*commandptr)(dpp::cluster& bot, const dpp::slashcommand_t& event);
-typedef struct {
-    std::string desc;
-    commandptr cmd;
-} command_entry;
-std::unordered_map<std::string, command_entry> commands;
-const std::string get_token() {
-    if (std::filesystem::exists(config_path)) {
-        std::ifstream ifs(config_path);
-        nlohmann::json j;
-        ifs >> j;
-        const std::string BOT_TOKEN = j["token"];
-        return BOT_TOKEN;
-    }
-    else {
-        Log("Config Not found");
-        return "";
-    }
-}
+/* Be sure to place your token in the line below.
+ * Follow steps here to get a token:
+ * https://dpp.dev/creating-a-bot-application.html
+ * When you invite the bot, be sure to invite it with the 
+ * scopes 'bot' and 'applications.commands', e.g.
+ * https://discord.com/oauth2/authorize?client_id=940762342495518720&scope=bot+applications.commands&permissions=139586816064
+ */
+const std::string    BOT_TOKEN    = "add your token here";
 
-#include <string_view>
-#include <cstring>
+int main()
+{
+    /* Create bot cluster */
+    dpp::cluster bot(BOT_TOKEN);
 
-static size_t hash_cstr(const char* s)
-{
-    return std::hash<std::string_view>()(std::string_view(s, std::strlen(s)));
-}
-void ping_cmd(dpp::cluster& bot, const dpp::slashcommand_t& event)
-{
-    event.reply("Pong!");
-}
-void hi_cmd(dpp::cluster& bot, const dpp::slashcommand_t& event)
-{
-    event.reply("hi!");
-}
-bool register_command(std::string name, std::string desc, commandptr func)
-{
-    if (commands.count(name)) return false;
-    commands[name] = { desc, func };
-    return true;
-}
+    /* Output simple log messages to stdout */
+    bot.on_log(dpp::utility::cout_logger());
 
-int main() {
-    dpp::cluster bot(get_token());
-    register_command("ping", "Ping Pong!", ping_cmd);
-    register_command("hi", "amongus", hi_cmd);
-    bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) {
-        auto cmd_name = event.command.get_command_name();
-        if (commands.count(cmd_name))
-            commands[cmd_name].cmd(bot, event);
-        });
-    bot.on_ready([&bot](const dpp::ready_t& event) {
-        if (dpp::run_once<struct register_bot_commands>()) {
-            for (auto& [name, entry] : commands)
-            {
-                bot.global_command_create(
-                    dpp::slashcommand(name, entry.desc, bot.me.id)
-                );
-            }
+    /* Handle slash command */
+    bot.on_slashcommand([](const dpp::slashcommand_t& event) {
+         if (event.command.get_command_name() == "ping") {
+            event.reply("Pong!");
         }
-        });
+    });
+
+    /* Register slash command here in on_ready */
+    bot.on_ready([&bot](const dpp::ready_t& event) {
+        /* Wrap command registration in run_once to make sure it doesnt run on every full reconnection */
+        if (dpp::run_once<struct register_bot_commands>()) {
+            bot.global_command_create(dpp::slashcommand("ping", "Ping pong!", bot.me.id));
+        }
+    });
+
+    /* Start the bot */
     bot.start(false);
+
+    return 0;
 }
