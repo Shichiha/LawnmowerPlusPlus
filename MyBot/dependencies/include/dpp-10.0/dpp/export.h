@@ -28,6 +28,9 @@
 
 	#ifdef _WIN32
 		#include <dpp/win32_safe_warnings.h>
+	#endif
+
+	#ifdef _WIN32
 		#define DPP_EXPORT __declspec(dllexport)
 	#else
 		#define DPP_EXPORT
@@ -40,12 +43,6 @@
 	#else
 		#define DPP_EXPORT
 	#endif
-#endif
-
-#ifdef INCLUDE_NLOHMANN_RAW
-#define INCLUDE_NLOHMANN <nlohmann/json.hpp>
-#else
-#define INCLUDE_NLOHMANN <dpp/nlohmann/json_fwd.hpp>
 #endif
 
 #ifndef _WIN32
