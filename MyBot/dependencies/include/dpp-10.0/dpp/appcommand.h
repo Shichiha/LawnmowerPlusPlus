@@ -18,9 +18,7 @@
  * limitations under the License.
  *
  ************************************************************************************/
-
 #pragma once
-
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
