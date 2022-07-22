@@ -18,7 +18,9 @@
  * limitations under the License.
  *
  ************************************************************************************/
+
 #pragma once
+
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
@@ -27,7 +29,7 @@
 #include <dpp/role.h>
 #include <dpp/user.h>
 #include <variant>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include INCLUDE_NLOHMANN
 #include <dpp/json_interface.h>
 
 namespace dpp {
