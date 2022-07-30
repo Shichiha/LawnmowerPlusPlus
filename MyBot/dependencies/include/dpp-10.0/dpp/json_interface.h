@@ -35,7 +35,7 @@ namespace dpp {
 	template<typename T> struct DPP_EXPORT json_interface {
 	protected:
 		/* Must not destruct through pointer to json_interface. */
-		~json_interface() = default;
+		virtual ~json_interface() = default;
 
 	public:
 		/**
@@ -44,7 +44,7 @@ namespace dpp {
 		 * @param j nlohmann::json object
 		 * @return T& Reference to self for fluent calling
 		 */
-		T& fill_from_json(nlohmann::json* j) {
+		virtual T& fill_from_json(nlohmann::json* j) {
 			throw dpp::logic_exception("JSON interface doesn't implement parse_from_json");
 		}
 
