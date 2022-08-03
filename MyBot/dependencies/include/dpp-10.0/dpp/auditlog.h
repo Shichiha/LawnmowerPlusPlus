@@ -193,10 +193,10 @@ public:
 	std::vector<audit_entry> entries;	//!< Audit log entries
 	
 	/** Constructor */
-	auditlog() = default;
+	auditlog();
 
 	/** Destructor */
-	virtual ~auditlog() = default;
+	~auditlog();
 
 	/** Read class values from json object
 	 * @param j A json object to read from
