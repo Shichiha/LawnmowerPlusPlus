@@ -20,7 +20,6 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
-#include <dpp/user.h>
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
 #include <dpp/utility.h>
@@ -259,14 +258,6 @@ public:
 	 * @return guild_member& reference to self
 	 */
 	guild_member& set_nickname(const std::string& nick);
-
-	/**
-	 * @brief Get the dpp::user object for this member
-	 * @return dpp::user user object. If not in cache, it returns nullptr
-	 *
-	 * 
-	 */
-	dpp::user* get_user() const;
 
 	/**
 	 * @brief Set whether the user is muted in voice channels
